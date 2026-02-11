@@ -4,15 +4,15 @@ importScripts('/uv/uv.sw.js');
 importScripts("/scram/scramjet.all.js");
 
 const uv = new UVServiceWorker();
-const { ScramjetServiceWorker } = $scramjetLoadWorker();
-const scramjet = new ScramjetServiceWorker();
+const { ScramjetServiceWorker: SJWorker } = $scramjetLoadWorker();
+const scramjet = new SJWorker();
 
-const configPromise = scramjet.loadConfig();
+self.addEventListener("install", () => {
+    self.skipWaiting();
+});
 
-self.addEventListener("message", ({ data }) => {
-    if (data.type === "playgroundData") {
-        playgroundData = data;
-    }
+self.addEventListener("activate", (event) => {
+    event.waitUntil(self.clients.claim());
 });
 
 async function handleRequest(event) {
@@ -20,7 +20,7 @@ async function handleRequest(event) {
         return await uv.fetch(event);
     }
 
-    await configPromise;
+    await scramjet.loadConfig();
     if (scramjet.route(event)) {
         return await scramjet.fetch(event);
     }
@@ -31,7 +31,7 @@ async function handleRequest(event) {
 self.addEventListener("fetch", (event) => {
     event.respondWith(
         handleRequest(event).catch((err) => {
-            console.error("SW Fetch Error:", err);
+            console.error(err);
             return fetch(event.request);
         })
     );
