@@ -65,20 +65,37 @@
         }
         .venusFooter {
             position: fixed;
-            bottom: 0;
-            right: 0;
-            margin-right: 3%;
+            bottom: 10px;
+            right: 20px;
             color: white;
-            font-size: 7px;
+            font-size: 10px;
+            text-decoration: none;
+            opacity: 0.7;
         }
-    </style>
-    <style>
+        .reset-button {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            outline: none;
+            transition: background-color 0.2s;
+            z-index: 1000;
+        }
+        .reset-button:hover {
+            background-color: rgba(0, 0, 0, 0.9);
+        }
         .app-buttons {
             display: flex;
             justify-content: center;
             margin-top: 20px;
         }
-
         .app-button {
             display: flex;
             align-items: center;
@@ -94,226 +111,173 @@
             color: white;
             text-decoration: none;
         }
-
         .app-button:hover {
             background-color: rgba(0, 0, 0, 0.9);
         }
-
         .app-button img {
             max-width: 60%;
             max-height: 60%;
         }
-
         #add-app-button {
             background-color: rgba(0, 0, 0, 0.7);
         }
-
-        #add-app-button:hover {
-            background-color: rgba(0, 0, 0, 0.9);
-        }
     </style>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const defaultBg = '/assets/backgrounds/foggy-forest.png';
-            let bg = localStorage.getItem('bg');
-            if (!bg) {
-                bg = defaultBg;
-                localStorage.setItem('bg', bg);
-            }
-            document.body.style.backgroundImage = `url('${bg}')`;
-        });
-
-        const savedFont = localStorage.getItem('font');
-        if (savedFont) {
-            document.body.style.fontFamily = savedFont;
-        }
-    </script>
-<script>
-    async function uvEncode(url) {
-        const encodedUrl = __uv$config.prefix + __uv$config.encodeUrl(url);
-        localStorage.setItem("url", encodedUrl);
-        window.location.href = "/search";
-    }
-
-    async function sjEncode(url) {
-        const encodedUrl = "/scram/service/" + encodeURIComponent(url);
-        localStorage.setItem("url", encodedUrl);
-        window.location.href = "/search";
-    }
-
-    async function init() {
-        try {
-            const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
-            
-            let transport = localStorage.getItem("transport") || "libcurl";
-            localStorage.setItem("transport", transport);
-
-            let wispUrl = (location.protocol === "https:" ? "wss" : "ws") + "://" + location.host + "/wisp/";
-            if (localStorage.getItem("wisp-server-type") === "custom") {
-                const customWisp = localStorage.getItem("wisp");
-                if (customWisp) wispUrl = customWisp;
-            } else {
-                localStorage.setItem("wisp", wispUrl);
-            }
-
-            const transportPath = transport === "epoxy" ? "/epoxy/index.mjs" : "/libcurl/index.mjs";
-
-            if (await connection.getTransport() !== transportPath) {
-                await connection.setTransport(transportPath, [{ wisp: wispUrl }]);
-            }
-        } catch (err) {
-            console.error(err);
+        async function uvEncode(url) {
+            const encodedUrl = __uv$config.prefix + __uv$config.encodeUrl(url);
+            localStorage.setItem("url", encodedUrl);
+            window.location.href = "/search";
         }
 
-        try {
-            const { ScramjetController } = $scramjetLoadController();
-            const scramjet = new ScramjetController({
-                prefix: "/scram/service/",
-                files: {
-                    wasm: "/scram/scramjet.wasm.wasm",
-                    all: "/scram/scramjet.all.js",
-                    sync: "/scram/scramjet.sync.js"
-                },
-                flags: {
-                    syncxhr: true
+        async function sjEncode(url) {
+            const encodedUrl = "/scram/service/" + encodeURIComponent(url);
+            localStorage.setItem("url", encodedUrl);
+            window.location.href = "/search";
+        }
+
+        async function init() {
+            try {
+                const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
+                let transport = localStorage.getItem("transport") || "libcurl";
+                localStorage.setItem("transport", transport);
+                let wispUrl = (location.protocol === "https:" ? "wss" : "ws") + "://" + location.host + "/wisp/";
+                if (localStorage.getItem("wisp-server-type") === "custom") {
+                    const customWisp = localStorage.getItem("wisp");
+                    if (customWisp) wispUrl = customWisp;
+                } else {
+                    localStorage.setItem("wisp", wispUrl);
                 }
-            });
-            window.sj = scramjet;
-            await scramjet.init();
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    if (navigator.serviceWorker) {
-        navigator.serviceWorker.getRegistrations().then(registrations => {
-            if (registrations.length === 0) {
-                navigator.serviceWorker.register("sw.js").catch(err => console.error(err));
+                const transportPath = transport === "epoxy" ? "/epoxy/index.mjs" : "/libcurl/index.mjs";
+                if (await connection.getTransport() !== transportPath) {
+                    await connection.setTransport(transportPath, [{ wisp: wispUrl }]);
+                }
+            } catch (err) {
+                console.error(err);
             }
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        init();
-
-        const defaultBg = '/assets/backgrounds/foggy-forest.png';
-        let bg = localStorage.getItem('bg') || defaultBg;
-        document.body.style.backgroundImage = `url('${bg}')`;
-        
-        const savedFont = localStorage.getItem('font');
-        if (savedFont) {
-            document.body.style.fontFamily = savedFont;
-        }
-
-        const searchInput = document.querySelector('.search-input');
-        const searchButton = document.querySelector('.search-button');
-        const appButtonsDiv = document.querySelector('.app-buttons');
-        const addAppButton = document.getElementById('add-app-button');
-
-        const encodeURL = async (url) => {
-            let proxyType = localStorage.getItem('proxy') || 'ultraviolet';
-            if (proxyType === 'ultraviolet') {
-                await uvEncode(url);
-            } else if (proxyType === 'scramjet') {
-                await sjEncode(url);
-            }
-        };
-
-        const handleSearch = async () => {
-            const query = searchInput.value.trim();
-            if (!query) return;
-
-            let url;
-            let isLikelySearch = false;
 
             try {
-                if (query.startsWith('http://') || query.startsWith('https://')) {
-                    url = new URL(query);
-                } else {
-                    url = new URL('https://' + query);
+                const { ScramjetController } = $scramjetLoadController();
+                const scramjet = new ScramjetController({
+                    prefix: "/scram/service/",
+                    files: {
+                        wasm: "/scram/scramjet.wasm.wasm",
+                        all: "/scram/scramjet.all.js",
+                        sync: "/scram/scramjet.sync.js"
+                    },
+                    flags: {
+                        syncxhr: true
+                    }
+                });
+                window.sj = scramjet;
+                await scramjet.init();
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        function resetSiteData() {
+            if (confirm("Reset all settings, custom apps, and site data?")) {
+                localStorage.clear();
+                if (navigator.serviceWorker) {
+                    navigator.serviceWorker.getRegistrations().then(registrations => {
+                        for (let r of registrations) r.unregister();
+                    });
                 }
-                if (!url.hostname || !url.hostname.includes('.')) {
+                window.location.reload();
+            }
+        }
+
+        if (navigator.serviceWorker) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                if (registrations.length === 0) {
+                    navigator.serviceWorker.register("sw.js").catch(err => console.error(err));
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+            const defaultBg = '/assets/backgrounds/foggy-forest.png';
+            let bg = localStorage.getItem('bg') || defaultBg;
+            document.body.style.backgroundImage = `url('${bg}')`;
+            const savedFont = localStorage.getItem('font');
+            if (savedFont) document.body.style.fontFamily = savedFont;
+
+            const searchInput = document.querySelector('.search-input');
+            const searchButton = document.querySelector('.search-button');
+            const appButtonsDiv = document.querySelector('.app-buttons');
+            const addAppButton = document.getElementById('add-app-button');
+
+            const encodeURL = async (url) => {
+                let proxyType = localStorage.getItem('proxy') || 'ultraviolet';
+                proxyType === 'ultraviolet' ? await uvEncode(url) : await sjEncode(url);
+            };
+
+            const handleSearch = async () => {
+                const query = searchInput.value.trim();
+                if (!query) return;
+                let url;
+                let isLikelySearch = false;
+                try {
+                    url = (query.startsWith('http://') || query.startsWith('https://')) ? new URL(query) : new URL('https://' + query);
+                    if (!url.hostname || !url.hostname.includes('.')) isLikelySearch = true;
+                } catch (e) {
                     isLikelySearch = true;
                 }
-            } catch (e) {
-                isLikelySearch = true;
-            }
+                if (isLikelySearch) url = new URL((localStorage.getItem('search') || 'https://www.google.com/search?q=') + query);
+                await encodeURL(url.toString());
+            };
 
-            if (isLikelySearch) {
-                url = new URL((localStorage.getItem('search') || 'https://www.google.com/search?q=') + query);
-            }
+            const createAppButton = (appName, appUrl) => {
+                const appButton = document.createElement('a');
+                appButton.href = '#';
+                appButton.classList.add('app-button');
+                appButton.textContent = appName;
+                appButton.addEventListener('click', (e) => { e.preventDefault(); encodeURL(appUrl); });
+                appButton.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    const index = apps.findIndex(a => a.name === appButton.textContent);
+                    if (index > -1) {
+                        apps.splice(index, 1);
+                        localStorage.setItem('apps', JSON.stringify(apps));
+                        appButton.remove();
+                    }
+                });
+                return appButton;
+            };
 
-            await encodeURL(url.toString());
-        };
-
-        const createAppButton = (appName, appUrl) => {
-            const appButton = document.createElement('a');
-            appButton.href = '#';
-            appButton.classList.add('app-button');
-            appButton.textContent = appName;
-
-            appButton.addEventListener('click', (event) => {
-                event.preventDefault();
-                encodeURL(appUrl);
+            let apps = JSON.parse(localStorage.getItem('apps') || '[]');
+            apps.forEach(app => {
+                const btn = createAppButton(app.name, app.url);
+                appButtonsDiv.insertBefore(btn, addAppButton);
             });
 
-            appButton.addEventListener('contextmenu', (event) => {
-                event.preventDefault();
-                const appIndex = apps.findIndex(app => app.name === appButton.textContent);
-                if (appIndex > -1) {
-                    apps.splice(appIndex, 1);
+            const addAppModal = document.getElementById('add-app-modal');
+            const addAppSubmit = document.getElementById('add-app-submit');
+            const addAppCancel = document.getElementById('add-app-cancel');
+            const appNameInput = document.getElementById('app-name');
+            const appUrlInput = document.getElementById('app-url');
+
+            addAppButton.addEventListener('click', () => addAppModal.style.display = 'flex');
+            addAppCancel.addEventListener('click', () => addAppModal.style.display = 'none');
+            addAppSubmit.addEventListener('click', () => {
+                const name = appNameInput.value;
+                let url = appUrlInput.value;
+                if (url && !url.startsWith('http')) url = 'https://' + url;
+                if (name && url) {
+                    apps.push({ name, url });
                     localStorage.setItem('apps', JSON.stringify(apps));
-                    appButton.remove();
+                    const btn = createAppButton(name, url);
+                    appButtonsDiv.insertBefore(btn, addAppButton);
+                    addAppModal.style.display = 'none';
+                    appNameInput.value = ''; appUrlInput.value = '';
                 }
             });
-            return appButton;
-        };
 
-        let apps = JSON.parse(localStorage.getItem('apps') || '[]');
-        apps.forEach(app => {
-            const appButton = createAppButton(app.name, app.url);
-            appButtonsDiv.insertBefore(appButton, addAppButton);
+            searchButton.addEventListener('click', handleSearch);
+            searchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSearch(); });
         });
-
-        const addAppModal = document.getElementById('add-app-modal');
-        const addAppSubmit = document.getElementById('add-app-submit');
-        const addAppCancel = document.getElementById('add-app-cancel');
-        const appNameInput = document.getElementById('app-name');
-        const appUrlInput = document.getElementById('app-url');
-
-        addAppButton.addEventListener('click', () => {
-            addAppModal.style.display = 'flex';
-        });
-
-        addAppCancel.addEventListener('click', () => {
-            addAppModal.style.display = 'none';
-        });
-
-        addAppSubmit.addEventListener('click', () => {
-            const appName = appNameInput.value;
-            let appUrl = appUrlInput.value;
-            if (appUrl && !appUrl.startsWith('http')) {
-                appUrl = 'https://' + appUrl;
-            }
-            if (appName && appUrl) {
-                apps.push({ name: appName, url: appUrl });
-                localStorage.setItem('apps', JSON.stringify(apps));
-                const appButton = createAppButton(appName, appUrl);
-                appButtonsDiv.insertBefore(appButton, addAppButton);
-                addAppModal.style.display = 'none';
-                appNameInput.value = '';
-                appUrlInput.value = '';
-            }
-        });
-
-        searchButton.addEventListener('click', handleSearch);
-        searchInput.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                handleSearch();
-            }
-        });
-    });
-</script>
+    </script>
 </head>
 <body>
     <%- include('parts/topbar.ejs') %>
@@ -323,61 +287,38 @@
             <button class="search-button">➜</button>
         </div>
         <div class="app-buttons">
-            <a href="#" class="app-button" onclick="event.preventDefault(); (async () => {
-                const searchInput = document.querySelector('.search-input');
-                searchInput.value = 'https://discord.com';
-                const searchButton = document.querySelector('.search-button');
-                searchButton.click();
-            })();">
+            <a href="#" class="app-button" onclick="event.preventDefault(); document.querySelector('.search-input').value = 'https://discord.com'; document.querySelector('.search-button').click();">
                 <img src="/assets/svg/discord.svg" alt="Discord">
             </a>
-            <a href="#" class="app-button" onclick="event.preventDefault(); (async () => {
-                const searchInput = document.querySelector('.search-input');
-                searchInput.value = 'https://play.geforcenow.com';
-                const searchButton = document.querySelector('.search-button');
-                searchButton.click();
-            })();">
+            <a href="#" class="app-button" onclick="event.preventDefault(); document.querySelector('.search-input').value = 'https://play.geforcenow.com'; document.querySelector('.search-button').click();">
                 <img src="/assets/svg/geforcenow.svg" alt="Geforcenow">
             </a>
-            <a href="#" class="app-button" onclick="event.preventDefault(); (async () => {
-                const searchInput = document.querySelector('.search-input');
-                searchInput.value = 'https://youtube.com';
-                const searchButton = document.querySelector('.search-button');
-                searchButton.click();
-            })();">
+            <a href="#" class="app-button" onclick="event.preventDefault(); document.querySelector('.search-input').value = 'https://youtube.com'; document.querySelector('.search-button').click();">
                 <img src="/assets/svg/youtube.svg" alt="Youtube">
             </a>
-            <a href="#" class="app-button" onclick="event.preventDefault(); (async () => {
-                const searchInput = document.querySelector('.search-input');
-                searchInput.value = 'https://spotify.com';
-                const searchButton = document.querySelector('.search-button');
-                searchButton.click();
-            })();">
+            <a href="#" class="app-button" onclick="event.preventDefault(); document.querySelector('.search-input').value = 'https://spotify.com'; document.querySelector('.search-button').click();">
                 <img src="/assets/svg/spotify.svg" alt="Spotify">
             </a>
-            <a href="#" class="app-button" onclick="event.preventDefault(); (async () => {
-                const searchInput = document.querySelector('.search-input');
-                searchInput.value = 'https://x.com';
-                const searchButton = document.querySelector('.search-button');
-                searchButton.click();
-            })();">
+            <a href="#" class="app-button" onclick="event.preventDefault(); document.querySelector('.search-input').value = 'https://x.com'; document.querySelector('.search-button').click();">
                 <img src="/assets/svg/x.svg" alt="Twitter/X">
             </a>
             <a href="#" class="app-button" id="add-app-button">
                 <img src="/assets/svg/plus.svg" alt="Add App">
             </a>
         </div>
-        <div id="add-app-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; backdrop-filter: blur(5px); color: white; font-family: var(--font-family);">
+        <div id="add-app-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; backdrop-filter: blur(5px); color: white;">
             <div style="background-color: rgba(0, 0, 0, 0.7); padding: 20px; border-radius: 10px; text-align: center;">
                 <h2 style="margin-bottom: 4px;">Add New App</h2>
-                <label for="app-name">App Name:</label><br>
-                <input type="text" id="app-name" name="app-name" style="border: none; border-radius: 25px; padding: 10px 20px; width: 200px; font-size: 16px; outline: none; background-color: rgba(255, 255, 255, 0.1); color: white;"><br><br>
-                <label for="app-url">App URL:</label><br>
-                <input type="text" id="app-url" name="app-url" style="border: none; border-radius: 25px; padding: 10px 20px; width: 200px; font-size: 16px; outline: none; background-color: rgba(255, 255, 255, 0.1); color: white;"><br><br>
-                <button id="add-app-submit" style="background-color: rgba(0, 0, 0, 0.7); border: none; border-radius: 25px; padding: 10px 15px; cursor: pointer; outline: none; color: white; font-size: 16px;">Add</button>
-                <button id="add-app-cancel" style="background-color: rgba(0, 0, 0, 0.7); border: none; border-radius: 25px; padding: 10px 15px; cursor: pointer; outline: none; color: white; font-size: 16px;">Cancel</button>
+                <label>App Name:</label><br>
+                <input type="text" id="app-name" style="border: none; border-radius: 25px; padding: 10px 20px; width: 200px; outline: none; background-color: rgba(255, 255, 255, 0.1); color: white;"><br><br>
+                <label>App URL:</label><br>
+                <input type="text" id="app-url" style="border: none; border-radius: 25px; padding: 10px 20px; width: 200px; outline: none; background-color: rgba(255, 255, 255, 0.1); color: white;"><br><br>
+                <button id="add-app-submit" style="background-color: rgba(0, 0, 0, 0.7); border: none; border-radius: 25px; padding: 10px 15px; cursor: pointer; color: white;">Add</button>
+                <button id="add-app-cancel" style="background-color: rgba(0, 0, 0, 0.7); border: none; border-radius: 25px; padding: 10px 15px; cursor: pointer; color: white;">Cancel</button>
             </div>
         </div>
     </div>
+    <button class="reset-button" onclick="resetSiteData()">Reset Site Data</button>
     <a href="<%= _venus%>" class="venusFooter">Venus integration</a>
+</body>
 </html>
