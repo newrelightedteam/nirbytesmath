@@ -7,6 +7,7 @@ import { bareModulePath } from "@mercuryworkshop/bare-as-module3"
 import { join } from "node:path";
 import { hostname } from "node:os";
 import { server as wisp } from "@mercuryworkshop/wisp-js/server";
+const serverless = require('serverless-http');
 // see https://github.com/xylara/venus
 import venus from "venus-pit"
 
@@ -129,3 +130,6 @@ function shutdown() {
 server.listen({
     port,
 });
+
+
+module.exports.handler = serverless(app);

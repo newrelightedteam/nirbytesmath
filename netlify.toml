@@ -1,0 +1,14 @@
+[build]
+  # This tells Netlify where to find your serverless functions
+  functions = "functions"
+
+[dev]
+  # This helps the Netlify CLI simulate the production environment locally
+  functions = "functions"
+  port = 8888 # Default port for 'netlify dev'
+
+# The most important part: redirect rules
+[[redirects]]
+  from = "/*"
+  to = "/.functions/index/:splat" # :splat is a wildcard that captures everything after '/api/'
+  status = 200
