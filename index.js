@@ -66,6 +66,15 @@ app.get("/settings", (req, res) => {
     res.render("settings/index");
 });
 
+app.get("/apps", (req, res) => {
+    res.render("apps/index");
+});
+
+
+app.get("/gmath", (req, res) => {
+    res.render("games/index");
+});
+
 app.get("/settings/styles", (req, res) => {
     res.render("settings/styles");
 });

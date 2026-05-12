@@ -1,11 +1,11 @@
 <%- include('../parts/topbar') %>
 <%- include('../parts/sidebar') %>
 <script src="https://app.rybbit.io/api/script.js" data-site-id="8b65ec526edf" defer></script>
-<title>Xylara</title>
+<title>Nirbytes - Math Science & Social Studies</title>
 
 <div class="settings-container">
     <div class="setting-item">
-        <label for="background-image">Honestly idk what to even add here</label>
+        <label for="background-image">Honestly idk what to even add here <br> So let me know guys :)</label>
     </div>
 </div>
  
@@ -23,6 +23,7 @@
         align-items: center;
         justify-content: flex-start;
         min-height: 100vh;
+                background-color: #222;
     }
 
     .settings-container {
@@ -81,7 +82,7 @@
             bg = defaultBg;
             localStorage.setItem('bg', bg);
         }
-        document.body.style.backgroundImage = `url('${bg}')`;
+        //document.body.style.backgroundImage = `url('${bg}')`;
 
         const backgroundImageSelect = document.getElementById('background-image');
         backgroundImageSelect.value = bg;

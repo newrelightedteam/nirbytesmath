@@ -1,0 +1,224 @@
+<%- include('../parts/topbar') %>
+    <script src="https://app.rybbit.io/api/script.js" data-site-id="8b65ec526edf" defer></script>
+    <title>Nirbytes - Math Science & Social Studies</title>
+
+    <%- include('../header') %>
+        <div class="settings-container">
+
+            <style>
+                body {
+                    background-size: cover;
+                    background-attachment: fixed;
+                    background-position: center;
+                    color: white;
+                    margin: 0;
+                    padding: 0;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: flex-start;
+                    min-height: 100vh;
+                    background: #222;
+                    font-family: Arial, Helvetica, sans-serif;
+                }
+
+                .settings-container {
+                    background-color: rgba(0, 0, 0, 0.5);
+                    padding: 20px;
+                    border-radius: 10px;
+                    width: 80%;
+                    max-width: 1200px;
+                    margin-top: 65px;
+                }
+
+                .search-box {
+                    flex: 1;
+                    height: 46px;
+                    border-radius: 14px;
+                    background: #061611;
+                    border: 1px solid rgba(199, 73, 14, 0.25);
+                    display: flex;
+                    align-items: center;
+                    max-width: 500px;
+                    padding: 0 16px;
+                    margin: 20px auto;
+                }
+
+                .search-box input {
+                    width: 100%;
+                    background: transparent;
+                    border: none;
+                    outline: none;
+                    color: white;
+                    font-size: 15px;
+                    margin-left: 12px;
+                }
+
+                .search-box input::placeholder {
+                    color: #6f8f85;
+                }
+
+                .available {
+                    color: #5fd3a5;
+                    font-size: 15px;
+                    padding: 0 26px;
+                    margin-bottom: 16px;
+                    margin-left: auto;
+                    float: right;
+                }
+
+                .clearfix {
+                    clear: both;
+                }
+
+                /* game grid */
+                .games-grid {
+                    padding: 0 24px 40px;
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                    gap: 14px;
+                }
+
+                /* game card */
+                .game-card {
+                    background: #061611;
+                    border-radius: 16px;
+                    overflow: hidden;
+                    border: 1px solid rgba(255, 255, 255, 0.06);
+                    transition: 0.25s;
+                    cursor: pointer;
+                }
+
+                .game-card:hover {
+                    transform: translateY(-4px);
+                    border-color: red;
+                }
+
+                .game-thumb {
+                    width: 100%;
+                    height: 100px;
+                    object-fit: cover;
+                    display: block;
+                }
+
+                .game-info {
+                    padding: 12px;
+                }
+
+                .game-title {
+                    font-size: 15px;
+                    font-weight: 700;
+                    margin-bottom: 6px;
+                }
+
+                .game-dot {
+                    width: 4px;
+                    height: 4px;
+                    background: #4fd3a2;
+                    border-radius: 50%;
+                }
+
+                .logo {
+                    text-align: center;
+                }
+            </style>
+
+
+
+            <h1 style="text-align: center; margin: 20px auto;">Educational Games</h1>
+
+            <div class="searchCont">
+
+                <div class="search-box">
+
+                    <svg class="topbar-icon" viewBox="0 0 24 24">
+                        <path d="M21 21L15.8 15.8" stroke="white" stroke-width="2" stroke-linecap="round" />
+                        <circle cx="11" cy="11" r="6" stroke="white" stroke-width="2" />
+                    </svg>
+
+                    <input type="text" id="searchInput" placeholder="search..." />
+                </div>
+
+            </div>
+
+            <div class="available">753 available</div>
+            <div class="clearfix"></div>
+
+            <div class="games-grid"> </div>
+        </div>
+
+        <%- include('../brandFooter') %>
+
+            <script src="/script.js"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+
+                    const apps = [
+                        {
+                            name: "Crazy Games",
+                            url: "https://www.crazygames.com/",
+                            icon: "/assets/apps/crazygames.jpg",
+                            alt: "Discord"
+                        },
+                        {
+                            name: "Roblox",
+                            url: "https://nowgg.fun/apps/a/19900/b.html",
+                            icon: "/assets/apps/roblox.jpg",
+                            alt: "Roblox"
+                        }
+                    ];
+
+
+                    function openApp(index) {
+                        let opening = apps[index];
+
+                        let url = opening.url;
+                        handleSearch(url);
+
+                    }
+
+                    let appsHTML = '';
+                    let appsGridParemt = document.querySelector('.games-grid');
+
+                    apps.forEach((app, i) => {
+                        appsHTML += `    <div data-id="${i}" class="game-card">
+        <img class="game-thumb" src="${app.icon}">
+        <div class="game-info">
+            <div class="game-title">${app.name}</div>
+        </div>
+    </div>`;
+                    })
+                    appsGridParemt.innerHTML = appsHTML;
+                    document.querySelector('.available').innerText = apps.length + ' available';
+
+                    let gameCards = document.querySelectorAll('.game-card');
+                    gameCards.forEach(gm => {
+                        gm.onclick = function () {
+                            let item = apps[gm.getAttribute('data-id')];
+                            handleSearch(item?.url);
+                        }
+                    })
+
+                    let searchInput = document.querySelector('#searchInput');
+
+                    searchInput.oninput = function (e) {
+                        let searchValue = searchInput.value;
+
+                        const items = appsGridParemt.querySelectorAll('.game-card');
+
+                        items.forEach(item => {
+                            const text = item.querySelector('.game-title').textContent.toLowerCase();
+                            const value = searchValue.toLowerCase();
+
+                            if (text.includes(value)) {
+                                item.style.display = "";
+                            } else {
+                                item.style.display = "none";
+                            }
+                        });
+
+                    }
+
+
+                });
+            </script>
