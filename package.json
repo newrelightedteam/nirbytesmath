@@ -1,5 +1,5 @@
 {
-  "name": "xylara",
+  "name": "nirbytesub",
   "version": "1.6.0",
   "type": "module",
   "packageManager": "pnpm@9.12.3",
@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node index.js"
   },
-  "author": "playstation451",
+  "author": "nirbytes",
   "license": "AGPL-3.0-only",
   "dependencies": {
     "@mercuryworkshop/bare-as-module3": "^2.2.5",
